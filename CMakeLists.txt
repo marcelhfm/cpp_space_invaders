@@ -10,7 +10,10 @@ find_package(GLEW REQUIRED)
 
 add_executable(cpp_space_invaders
         main.cpp
-        sprite.cpp
-        sprite.h
-        buffer.h)
+        sprite/sprite.cpp
+        sprite/sprite.h
+        structs/structs.h
+        game/game.cpp
+        game/game.h
+)
 target_link_libraries(cpp_space_invaders glfw OpenGL::GL GLEW::GLEW)
