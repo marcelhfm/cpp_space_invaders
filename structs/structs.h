@@ -8,9 +8,19 @@
 #include <cstdio>
 #include <cstdint>
 
-struct Buffer{
+struct Buffer {
     size_t width, height;
-    uint32_t* data;
+    uint32_t *data;
+};
+
+struct Alien {
+    size_t x, y;
+    uint8_t type;
+};
+
+struct Player {
+    size_t x, y;
+    size_t life;
 };
 
 #endif //CPP_SPACE_INVADERS_BUFFER_H

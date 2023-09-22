@@ -6,8 +6,9 @@
 #include <GLFW/glfw3.h>
 #include <cstdio>
 #include <iostream>
-#include "buffer.h"
-#include "sprite.h"
+#include "structs/structs.h"
+#include "sprite/sprite.h"
+#include "game/game.h"
 
 void errorCallback(__attribute__((unused)) int error, const char *description) {
     fprintf(stderr, "Error: %s\n", description);
@@ -93,6 +94,7 @@ int main(int argc, char *argv[]) {
 
     printOpenGlVersion();
 
+    glfwSwapInterval(1);
 
     glClearColor(1.0, 0.0, 0.0, 1.0);
 
@@ -103,11 +105,12 @@ int main(int argc, char *argv[]) {
 
     clearBuffer(&buffer, 0);
 
-    // Create texture for presenting buffer to OpenGL
+    // Create texture for presenting structs to OpenGL
     GLuint buffer_texture;
     glGenTextures(1, &buffer_texture);
     glBindTexture(GL_TEXTURE_2D, buffer_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, buffer.width, buffer.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, buffer.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, buffer.width, buffer.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
+                 buffer.data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -118,21 +121,21 @@ int main(int argc, char *argv[]) {
     GLuint fullscreenTriangleVao;
     glGenVertexArrays(1, &fullscreenTriangleVao);
 
-    // Create shader for displaying buffer
-    static const char* fragmentShader =
+    // Create shader for displaying structs
+    static const char *fragmentShader =
             "\n"
             "#version 330\n"
             "\n"
-            "uniform sampler2D buffer;\n"
+            "uniform sampler2D structs;\n"
             "noperspective in vec2 TexCoord;\n"
             "\n"
             "out vec3 outColor;\n"
             "\n"
             "void main(void){\n"
-            "    outColor = texture(buffer, TexCoord).rgb;\n"
+            "    outColor = texture(structs, TexCoord).rgb;\n"
             "}\n";
 
-    static const char* vertexShader =
+    static const char *vertexShader =
             "\n"
             "#version 330\n"
             "\n"
@@ -174,7 +177,7 @@ int main(int argc, char *argv[]) {
 
     glLinkProgram(shaderId);
 
-    if(!validateProgram(shaderId)){
+    if (!validateProgram(shaderId)) {
         fprintf(stderr, "Error while validating shader.\n");
         glfwTerminate();
         glDeleteVertexArrays(1, &fullscreenTriangleVao);
@@ -184,7 +187,7 @@ int main(int argc, char *argv[]) {
 
     glUseProgram(shaderId);
 
-    GLint location = glGetUniformLocation(shaderId, "buffer");
+    GLint location = glGetUniformLocation(shaderId, "structs");
     glUniform1i(location, 0);
 
     //OpenGL setup
@@ -194,28 +197,78 @@ int main(int argc, char *argv[]) {
     glBindVertexArray(fullscreenTriangleVao);
 
     // Prepare game
-    Sprite alienSprite{};
-    alienSprite.width = 11;
-    alienSprite.height = 8;
-    alienSprite.data = new uint8_t[88]
+
+    Sprite playerSprite{};
+    playerSprite.width = 11;
+    playerSprite.height = 7;
+    playerSprite.data = new uint8_t[77]
             {
-                    0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
-                    0,0,0,1,0,0,0,1,0,0,0, // ...@...@...
-                    0,0,1,1,1,1,1,1,1,0,0, // ..@@@@@@@..
-                    0,1,1,0,1,1,1,0,1,1,0, // .@@.@@@.@@.
-                    1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
-                    1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
-                    1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
-                    0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
+                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, // .....@.....
+                    0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, // ....@@@....
+                    0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, // ....@@@....
+                    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, // .@@@@@@@@@.
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // @@@@@@@@@@@
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // @@@@@@@@@@@
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // @@@@@@@@@@@
             };
+
+    Sprite alienSprite0{createAlien0()};
+    Sprite alienSprite1{createAlien1()};
+
+    SpriteAnimation *alienAnimation = new SpriteAnimation;
+
+    alienAnimation->loop = true;
+    alienAnimation->numberOfFrames = 2;
+    alienAnimation->frameDuration = 10;
+    alienAnimation->time = 0;
+
+    alienAnimation->frames = new Sprite *[2];
+    alienAnimation->frames[0] = &alienSprite0;
+    alienAnimation->frames[1] = &alienSprite1;
+
+    Game game{};
+    game.width = bufferWidth;
+    game.height = bufferHeight;
+    game.num_aliens = 55;
+    game.aliens = new Alien[game.num_aliens];
+
+    game.player.x = 112 - 5;
+    game.player.y = 32;
+
+    game.player.life = 3;
+
+    // Init aliens
+    for (size_t yi = 0; yi < 5; ++yi) {
+        for (size_t xi = 0; xi < 11; ++xi) {
+            game.aliens[yi * 11 + xi].x = 16 * xi + 20;
+            game.aliens[yi * 11 + xi].y = 17 * yi + 128;
+        }
+    }
 
     uint32_t clearColor = rgbToUint32(0, 128, 0);
 
-    while (!glfwWindowShouldClose(window))
-    {
+
+    int playerMoveDirection = 1;
+    while (!glfwWindowShouldClose(window)) {
         clearBuffer(&buffer, clearColor);
 
-        drawSpriteBuffer(&buffer, alienSprite, 112, 128, rgbToUint32(128, 0, 0));
+        // Draw
+        for (size_t ai = 0; ai < game.num_aliens; ++ai) {
+            const Alien &alien = game.aliens[ai];
+            size_t currentFrame = alienAnimation->time / alienAnimation->frameDuration;
+            const Sprite &sprite = *alienAnimation->frames[currentFrame];
+            drawSpriteBuffer(&buffer, sprite, alien.x, alien.y, rgbToUint32(128, 0, 0));
+        }
+
+        drawSpriteBuffer(&buffer, playerSprite, game.player.x, game.player.y, rgbToUint32(128, 0, 0));
+
+        //Update animations
+        ++alienAnimation->time;
+        if (alienAnimation->time == alienAnimation->numberOfFrames * alienAnimation->frameDuration) {
+            if (alienAnimation->loop) {
+                alienAnimation->time = 0;
+            }
+        }
 
         glTexSubImage2D(
                 GL_TEXTURE_2D, 0, 0, 0,
@@ -227,6 +280,18 @@ int main(int argc, char *argv[]) {
 
         glfwSwapBuffers(window);
 
+        // Player movement
+        if (game.player.x + playerSprite.width + playerMoveDirection >= game.width - 1) {
+            game.player.x = game.width - playerSprite.width - playerMoveDirection - 1;
+            playerMoveDirection *= -1;
+        } else if ((int) game.player.x + playerMoveDirection <= 0)
+        {
+            game.player.x = 0;
+            playerMoveDirection *= -1;
+        } else {
+            game.player.x += playerMoveDirection;
+        }
+
         glfwPollEvents();
     }
 
@@ -235,8 +300,11 @@ int main(int argc, char *argv[]) {
 
     glDeleteVertexArrays(1, &fullscreenTriangleVao);
 
-    delete[] alienSprite.data;
+    delete[] alienSprite0.data;
+    delete[] alienSprite1.data;
+    delete[] alienAnimation->frames;
     delete[] buffer.data;
+    delete[] game.aliens;
 
     return 0;
 }
