@@ -18,39 +18,20 @@ void drawSpriteBuffer(Buffer *buffer, const Sprite &sprite, size_t x, size_t y, 
     }
 }
 
-Sprite createAlien0() {
-    Sprite alienSprite{};
-    alienSprite.width = 11;
-    alienSprite.height = 8;
-    alienSprite.data = new uint8_t[88]
-            {
-                    0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, // ..@.....@..
-                    0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, // ...@...@...
-                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, // ..@@@@@@@..
-                    0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, // .@@.@@@.@@.
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // @@@@@@@@@@@
-                    1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, // @.@@@@@@@.@
-                    1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, // @.@.....@.@
-                    0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0  // ...@@.@@...
-            };
+bool checkSpriteOverlap(
+        const Sprite& sp_a, size_t x_a, size_t y_a,
+        const Sprite& sp_b, size_t x_b, size_t y_b
+)
+{
+    // NOTE: For simplicity we just check for overlap of the sprite
+    // rectangles. Instead, if the rectangles overlap, we should
+    // further check if any pixel of sprite A overlap with any of
+    // sprite B.
+    if(x_a < x_b + sp_b.width && x_a + sp_a.width > x_b &&
+       y_a < y_b + sp_b.height && y_a + sp_a.height > y_b)
+    {
+        return true;
+    }
 
-    return alienSprite;
-}
-
-Sprite createAlien1() {
-    Sprite alienSprite{};
-    alienSprite.width = 11;
-    alienSprite.height = 8;
-    alienSprite.data = new uint8_t[88]{
-            0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, // ..@.....@..
-            1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, // @..@...@..@
-            1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, // @.@@@@@@@.@
-            1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, // @@@.@@@.@@@
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // @@@@@@@@@@@
-            0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, // .@@@@@@@@@.
-            0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, // ..@.....@..
-            0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0  // .@.......@.
-    };
-
-    return alienSprite;
+    return false;
 }
