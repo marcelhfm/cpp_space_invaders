@@ -149,28 +149,32 @@ int main(int argc, char *argv[]) {
     GLuint shaderId = glCreateProgram();
 
     {
-        // Create Vertex shader
+        //Create vertex shader
         GLuint shaderVp = glCreateShader(GL_VERTEX_SHADER);
 
-        glShaderSource(shaderVp, 1, &vertexShader, nullptr);
+        glShaderSource(shaderVp, 1, &vertexShader, 0);
         glCompileShader(shaderVp);
         validateShader(shaderVp, vertexShader);
         glAttachShader(shaderId, shaderVp);
+
+        glDeleteShader(shaderVp);
     }
 
     {
-        // Create fragment shader
+        //Create fragment shader
         GLuint shaderFp = glCreateShader(GL_FRAGMENT_SHADER);
 
-        glShaderSource(shaderFp, 1, &fragmentShader, nullptr);
+        glShaderSource(shaderFp, 1, &fragmentShader, 0);
         glCompileShader(shaderFp);
         validateShader(shaderFp, fragmentShader);
         glAttachShader(shaderId, shaderFp);
+
+        glDeleteShader(shaderFp);
     }
 
     glLinkProgram(shaderId);
 
-    if (!validateProgram(shaderId)) {
+    if(!validateProgram(shaderId)){
         fprintf(stderr, "Error while validating shader.\n");
         glfwTerminate();
         glDeleteVertexArrays(1, &fullscreenTriangleVao);
@@ -183,44 +187,56 @@ int main(int argc, char *argv[]) {
     GLint location = glGetUniformLocation(shaderId, "buffer");
     glUniform1i(location, 0);
 
-    //OpenGl Setup
+    //OpenGL setup
     glDisable(GL_DEPTH_TEST);
     glActiveTexture(GL_TEXTURE0);
 
     glBindVertexArray(fullscreenTriangleVao);
 
-    //Prepare game
+    // Prepare game
     Sprite alienSprite{};
     alienSprite.width = 11;
     alienSprite.height = 8;
     alienSprite.data = new uint8_t[88]
             {
-                    0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,            // ..@.....@..
-                    0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,    // ...@...@...
-                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,    // ..@@@@@@@..
-                    0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, // .@@.@@@.@@.
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // @@@@@@@@@@@
-                    1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, // @.@@@@@@@.@
-                    1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, // @.@.....@.@
-                    0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0  // ...@@.@@...ﬂ
+                    0,0,1,0,0,0,0,0,1,0,0, // ..@.....@..
+                    0,0,0,1,0,0,0,1,0,0,0, // ...@...@...
+                    0,0,1,1,1,1,1,1,1,0,0, // ..@@@@@@@..
+                    0,1,1,0,1,1,1,0,1,1,0, // .@@.@@@.@@.
+                    1,1,1,1,1,1,1,1,1,1,1, // @@@@@@@@@@@
+                    1,0,1,1,1,1,1,1,1,0,1, // @.@@@@@@@.@
+                    1,0,1,0,0,0,0,0,1,0,1, // @.@.....@.@
+                    0,0,0,1,1,0,1,1,0,0,0  // ...@@.@@...
             };
 
     uint32_t clearColor = rgbToUint32(0, 128, 0);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         clearBuffer(&buffer, clearColor);
 
         drawSpriteBuffer(&buffer, alienSprite, 112, 128, rgbToUint32(128, 0, 0));
 
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bufferWidth, bufferHeight, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
-                        buffer.data);
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glTexSubImage2D(
+                GL_TEXTURE_2D, 0, 0, 0,
+                buffer.width, buffer.height,
+                GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
+                buffer.data
+        );
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         glfwSwapBuffers(window);
+
         glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    glDeleteVertexArrays(1, &fullscreenTriangleVao);
+
+    delete[] alienSprite.data;
+    delete[] buffer.data;
+
+    return 0;
 }
