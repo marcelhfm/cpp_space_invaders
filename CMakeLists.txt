@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.26)
+project(cpp_space_invaders)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
+
+find_package(glfw3 3.3 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+
+add_executable(cpp_space_invaders
+        main.cpp
+        sprite.cpp
+        sprite.h
+        buffer.h)
+target_link_libraries(cpp_space_invaders glfw OpenGL::GL GLEW::GLEW)
