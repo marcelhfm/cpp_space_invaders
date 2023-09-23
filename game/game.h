@@ -5,7 +5,6 @@
 #ifndef CPP_SPACE_INVADERS_GAME_H
 #define CPP_SPACE_INVADERS_GAME_H
 
-#include "../sprite/sprite.h"
 #include <cstdio>
 #include <cstdint>
 
@@ -15,6 +14,13 @@ struct Sprite
     uint8_t* data;
 };
 
+struct SpriteAnimation {
+    __attribute__((unused)) bool loop;
+    size_t numberOfFrames;
+    size_t frameDuration;
+    size_t time;
+    Sprite **frames;
+};
 
 const int GAME_MAX_BULLETS = 128;
 
