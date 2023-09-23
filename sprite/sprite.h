@@ -5,29 +5,27 @@
 #ifndef CPP_SPACE_INVADERS_SPRITE_H
 #define CPP_SPACE_INVADERS_SPRITE_H
 
-
-#include "../structs/structs.h"
+#include "../game/game.h"
 #include <cstdio>
 #include <cstdint>
 
-struct Sprite
-{
-    size_t width, height;
-    uint8_t* data;
-};
-
-struct SpriteAnimation
-{
+struct SpriteAnimation {
     bool loop;
     size_t numberOfFrames;
     size_t frameDuration;
     size_t time;
-    Sprite** frames;
+    Sprite **frames;
 };
 
-SpriteAnimation createAlienSpriteAnimation(Sprite& alienSprite0, Sprite& alienSprite1 );
-Sprite createAlien1();
-Sprite createAlien0();
-void drawSpriteBuffer(Buffer* buffer, const Sprite& sprite, size_t x, size_t y, uint32_t color);
+bool checkSpriteOverlap(
+        const Sprite &sp_a, size_t x_a, size_t y_a,
+        const Sprite &sp_b, size_t x_b, size_t y_b
+);
+
+Sprite createNumberSpriteSheet();
+Sprite createTextSpriteSheet();
+void drawTextBuffer(Buffer *buffer, const Sprite& textSpriteSheet, const char* text, size_t x, size_t y, uint32_t color);
+void drawNumberBuffer(Buffer* buffer, const Sprite& numberSpriteSheet, size_t number, size_t x, size_t y, uint32_t color);
+void drawSpriteBuffer(Buffer *buffer, const Sprite &sprite, size_t x, size_t y, uint32_t color);
 
 #endif //CPP_SPACE_INVADERS_SPRITE_H
