@@ -235,6 +235,9 @@ int main(int argc, char *argv[]) {
 
     Sprite bulletSprite{createBullet()};
 
+    Sprite textSpriteSheet{createTextSpriteSheet()};
+    Sprite numberSpriteSheet{createNumberSpriteSheet()};
+
     // Alien animation
     SpriteAnimation alienAnimation[3];
 
@@ -261,36 +264,49 @@ int main(int argc, char *argv[]) {
 
 
     // Init aliens
-    for(size_t yi = 0; yi < 5; ++yi)
-    {
-        for(size_t xi = 0; xi < 11; ++xi)
-        {
-            Alien& alien = game.aliens[yi * 11 + xi];
+    for (size_t yi = 0; yi < 5; ++yi) {
+        for (size_t xi = 0; xi < 11; ++xi) {
+            Alien &alien = game.aliens[yi * 11 + xi];
             alien.type = (5 - yi) / 2 + 1;
 
-            const Sprite& sprite = alienSprites[2 * (alien.type - 1)];
+            const Sprite &sprite = alienSprites[2 * (alien.type - 1)];
 
-            alien.x = 16 * xi + 20 + (deathSprite.width - sprite.width)/2;
+            alien.x = 16 * xi + 20 + (deathSprite.width - sprite.width) / 2;
             alien.y = 17 * yi + 128;
         }
     }
 
-    auto* deathCounters = new uint8_t[game.numberOfAliens];
+    auto *deathCounters = new uint8_t[game.numberOfAliens];
     for (size_t i = 0; i < game.numberOfAliens; i++) {
         deathCounters[i] = 10;
     }
 
     uint32_t clearColor = rgbToUint32(0, 128, 0);
 
+    size_t score = 0;
+    size_t credits = 0;
+
     gameRunning = true;
 
     int playerMoveDirection = 0;
+    // Game loop
     while (!glfwWindowShouldClose(window) && gameRunning) {
         clearBuffer(&buffer, clearColor);
 
+        drawTextBuffer(&buffer, textSpriteSheet, "SCORE", 4, game.height - textSpriteSheet.height - 7,
+                       rgbToUint32(128, 0, 0));
+        drawNumberBuffer(&buffer, numberSpriteSheet, score, 4 + 2 * numberSpriteSheet.width,
+                         game.height - 2 * numberSpriteSheet.height - 12,
+                         rgbToUint32(128, 0, 0));
+        drawTextBuffer(&buffer, textSpriteSheet, "CREDIT 00", 164, 7, rgbToUint32(128, 0, 0));
+        for(size_t i = 0; i < game.width; ++i)
+        {
+            buffer.data[game.width * 16 + i] = rgbToUint32(128, 0, 0);
+        }
+
         // Draw
         for (size_t ai = 0; ai < game.numberOfAliens; ++ai) {
-            if(!deathCounters[ai]) continue;
+            if (!deathCounters[ai]) continue;
 
             const Alien &alien = game.aliens[ai];
 
@@ -313,11 +329,9 @@ int main(int argc, char *argv[]) {
         drawSpriteBuffer(&buffer, playerSprite, game.player.x, game.player.y, rgbToUint32(128, 0, 0));
 
         //Update animations
-        for(auto & i : alienAnimation)
-        {
+        for (auto &i: alienAnimation) {
             ++i.time;
-            if(i.time == i.numberOfFrames * i.frameDuration)
-            {
+            if (i.time == i.numberOfFrames * i.frameDuration) {
                 i.time = 0;
             }
         }
@@ -334,9 +348,8 @@ int main(int argc, char *argv[]) {
         glfwSwapBuffers(window);
 
         // Simulate Aliens
-        for (size_t ai = 0; ai < game.numberOfAliens; ++ai)
-        {
-            const Alien& alien = game.aliens[ai];
+        for (size_t ai = 0; ai < game.numberOfAliens; ++ai) {
+            const Alien &alien = game.aliens[ai];
             if (alien.type == ALIEN_DEAD && deathCounters[ai]) {
                 --deathCounters[ai];
             }
@@ -352,20 +365,20 @@ int main(int argc, char *argv[]) {
             }
 
             // Check for a hit
-            for (size_t ai = 0; ai < game.numberOfAliens; ai++)
-            {
-                const Alien& alien = game.aliens[ai];
+            for (size_t ai = 0; ai < game.numberOfAliens; ai++) {
+                const Alien &alien = game.aliens[ai];
                 if (alien.type == ALIEN_DEAD) continue;
 
-                const SpriteAnimation& animation = alienAnimation[alien.type -1];
+                const SpriteAnimation &animation = alienAnimation[alien.type - 1];
                 size_t currentFrame = animation.time / animation.frameDuration;
-                const Sprite& alienSprite = *animation.frames[currentFrame];
-                bool overlap = checkSpriteOverlap(bulletSprite, game.bullets[bi].x, game.bullets[bi].y, alienSprite, alien.x, alien.y);
-                if (overlap)
-                {
+                const Sprite &alienSprite = *animation.frames[currentFrame];
+                bool overlap = checkSpriteOverlap(bulletSprite, game.bullets[bi].x, game.bullets[bi].y, alienSprite,
+                                                  alien.x, alien.y);
+                if (overlap) {
+                    score += 10 * (4 - game.aliens[ai].type);
                     game.aliens[ai].type = ALIEN_DEAD;
                     game.aliens[ai].x -= (deathSprite.width - alienSprite.width) / 2;
-                    game.bullets[bi] = game.bullets[game.numberOfBullets -1];
+                    game.bullets[bi] = game.bullets[game.numberOfBullets - 1];
                     --game.numberOfBullets;
                     continue;
                 }
