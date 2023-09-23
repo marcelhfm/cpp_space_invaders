@@ -5,17 +5,11 @@
 #ifndef CPP_SPACE_INVADERS_SPRITE_H
 #define CPP_SPACE_INVADERS_SPRITE_H
 
-#include "../game/game.h"
 #include <cstdio>
 #include <cstdint>
+#include "../game/game.h"
 
-struct SpriteAnimation {
-    bool loop;
-    size_t numberOfFrames;
-    size_t frameDuration;
-    size_t time;
-    Sprite **frames;
-};
+
 
 bool checkSpriteOverlap(
         const Sprite &sp_a, size_t x_a, size_t y_a,
