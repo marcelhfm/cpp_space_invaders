@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    uint8_t* deathCounters = new uint8_t[game.numberOfAliens];
+    auto* deathCounters = new uint8_t[game.numberOfAliens];
     for (size_t i = 0; i < game.numberOfAliens; i++) {
         deathCounters[i] = 10;
     }
@@ -363,7 +363,7 @@ int main(int argc, char *argv[]) {
                 bool overlap = checkSpriteOverlap(bulletSprite, game.bullets[bi].x, game.bullets[bi].y, alienSprite, alien.x, alien.y);
                 if (overlap)
                 {
-                    game.aliens[ai].type == ALIEN_DEAD;
+                    game.aliens[ai].type = ALIEN_DEAD;
                     game.aliens[ai].x -= (deathSprite.width - alienSprite.width) / 2;
                     game.bullets[bi] = game.bullets[game.numberOfBullets -1];
                     --game.numberOfBullets;
