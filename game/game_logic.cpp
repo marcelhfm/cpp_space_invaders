@@ -150,3 +150,23 @@ void processEvents(Game &game, Sprite &playerSprite) {
     }
     firePressed = false;
 }
+
+bool checkGameOver(Game &game, Sprite& playerSprite, SpriteAnimation *alienAnimation) {
+    if (allAliensDead(game)) return true;
+
+    for (size_t ai = 0; ai < game.numberOfAliens; ai++) {
+        const Alien &alien = game.aliens[ai];
+        if (alien.type == ALIEN_DEAD) continue;
+
+        const SpriteAnimation &animation = alienAnimation[alien.type - 1];
+        size_t currentFrame = animation.time / animation.frameDuration;
+        const Sprite &alienSprite = *animation.frames[currentFrame];
+        bool overlap = checkSpriteOverlap(playerSprite, game.player.x, game.player.y, alienSprite,
+                                          alien.x, alien.y);
+        if (overlap) {
+            return true;
+        }
+    }
+
+    return false;
+}

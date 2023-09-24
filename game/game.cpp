@@ -8,6 +8,17 @@ uint32_t rgbToUint32(uint8_t r, uint8_t g, uint8_t b) {
     return (r << 24) | (g << 16) | (b << 8) | 255;
 }
 
+int allAliensDead (Game& game) {
+    for (int i = 0; i < game.numberOfAliens; i++) {
+        Alien &alien = game.aliens[i];
+       if (alien.type != ALIEN_DEAD) {
+           return false;
+       }
+    }
+
+    return true;
+}
+
 int getAlienMaxX (Game& game)
 {
     int maxX {0};

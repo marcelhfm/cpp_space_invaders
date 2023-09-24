@@ -21,4 +21,7 @@ void drawScene(Buffer &buffer, Game &game, SpriteAnimation *alienAnimation, cons
                Sprite &bulletSprite, Sprite &deathSprite, Sprite &textSpriteSheet, Sprite &numberSpriteSheet,
                uint32_t &score);
 
+bool checkGameOver(Game &game, Sprite& playerSprite, SpriteAnimation *alienAnimation);
+
+
 #endif //CPP_SPACE_INVADERS_GAME_LOGIC_H
