@@ -69,4 +69,8 @@ enum AlienType: uint8_t
     ALIEN_TYPE_C = 3
 };
 
+int getAlienMaxX (Game& game);
+int getAlienMinX (Game& game);
+int allAliensDead (Game& game);
+
 #endif //CPP_SPACE_INVADERS_GAME_H

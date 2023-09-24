@@ -9,8 +9,10 @@ extern bool firePressed;
 extern int moveDir;
 
 void
-drawScene(Buffer &buffer, Game &game, SpriteAnimation *alienAnimation, const uint8_t *deathCounters, Sprite &playerSprite,
-          Sprite &bulletSprite, Sprite &deathSprite, Sprite &textSpriteSheet, Sprite &numberSpriteSheet, uint32_t &score) {
+drawScene(Buffer &buffer, Game &game, SpriteAnimation *alienAnimation, const uint8_t *deathCounters,
+          Sprite &playerSprite,
+          Sprite &bulletSprite, Sprite &deathSprite, Sprite &textSpriteSheet, Sprite &numberSpriteSheet,
+          uint32_t &score) {
     // Draw Score and bottom UI
     drawTextBuffer(&buffer, textSpriteSheet, "SCORE", 4, game.height - textSpriteSheet.height - 7,
                    rgbToUint32(128, 0, 0));
@@ -47,22 +49,46 @@ drawScene(Buffer &buffer, Game &game, SpriteAnimation *alienAnimation, const uin
     drawSpriteBuffer(&buffer, playerSprite, game.player.x, game.player.y, rgbToUint32(128, 0, 0));
 
     //Update animations
-    for(size_t i = 0; i < 3; ++i)
-    {
+    for (size_t i = 0; i < 3; ++i) {
         ++alienAnimation[i].time;
-        if(alienAnimation[i].time == alienAnimation[i].numberOfFrames * alienAnimation[i].frameDuration)
-        {
+        if (alienAnimation[i].time == alienAnimation[i].numberOfFrames * alienAnimation[i].frameDuration) {
             alienAnimation[i].time = 0;
         }
     }
 }
 
 
-void simulateAliens(Game &game, __attribute__((unused)) SpriteAnimation *alienAnimation, uint8_t *deathCounters) {
+void simulateAliens(Game &game, __attribute__((unused)) SpriteAnimation *alienAnimation, uint8_t *deathCounters,
+                    int& alienMoveDirection) {
+    int maxX {getAlienMaxX(game)};
+    int minX {getAlienMinX(game)};
+    bool aliensChangedDirection {false};
+
+    if (maxX >= game.width) {
+        alienMoveDirection = -1;
+        aliensChangedDirection = true;
+    } else if (minX <= 0) {
+        alienMoveDirection = 1;
+        aliensChangedDirection = true;
+    }
+
     for (size_t ai = 0; ai < game.numberOfAliens; ++ai) {
-        const Alien &alien = game.aliens[ai];
+        Alien &alien = game.aliens[ai];
         if (alien.type == ALIEN_DEAD && deathCounters[ai]) {
             --deathCounters[ai];
+        }
+
+        if (alien.x + alienMoveDirection > game.width) {
+            alien.x = game.width;
+        } else if (alien.x - alienMoveDirection < 0) {
+            alien.x = 0;
+        } else {
+            alien.x += alienMoveDirection;
+        }
+
+        if (aliensChangedDirection)
+        {
+            --alien.y;
         }
     }
 }
@@ -123,4 +149,24 @@ void processEvents(Game &game, Sprite &playerSprite) {
         ++game.numberOfBullets;
     }
     firePressed = false;
+}
+
+bool checkGameOver(Game &game, Sprite& playerSprite, SpriteAnimation *alienAnimation) {
+    if (allAliensDead(game)) return true;
+
+    for (size_t ai = 0; ai < game.numberOfAliens; ai++) {
+        const Alien &alien = game.aliens[ai];
+        if (alien.type == ALIEN_DEAD) continue;
+
+        const SpriteAnimation &animation = alienAnimation[alien.type - 1];
+        size_t currentFrame = animation.time / animation.frameDuration;
+        const Sprite &alienSprite = *animation.frames[currentFrame];
+        bool overlap = checkSpriteOverlap(playerSprite, game.player.x, game.player.y, alienSprite,
+                                          alien.x, alien.y);
+        if (overlap) {
+            return true;
+        }
+    }
+
+    return false;
 }

@@ -16,6 +16,7 @@ int moveDir = 0;
 bool firePressed = false;
 const size_t bufferWidth = 224;
 const size_t bufferHeight = 256;
+bool gameLost = false;
 
 
 void clearBuffer(Buffer *buffer, uint32_t color) {
@@ -52,7 +53,6 @@ int main() {
     game.numberOfAliens = 55;
     auto *deathCounters = new uint8_t[game.numberOfAliens];
 
-    prepareGame(game, alienSprites, deathSprite, alienAnimation, deathCounters, buffer);
 
     uint32_t clearColor = rgbToUint32(0, 128, 0);
 
@@ -61,14 +61,32 @@ int main() {
     gameRunning = true;
 
     int playerMoveDirection;
+    int alienMoveDirection{1};
+    int alienUpdateFrequency{120};
+    bool skipSimulation{false};
+
+    prepareGame(game, alienSprites, deathSprite, alienAnimation, deathCounters, buffer, alienUpdateFrequency);
+
 
     // Game loop
     while (!glfwWindowShouldClose(window) && gameRunning) {
         clearBuffer(&buffer, clearColor);
 
-        drawScene(buffer, game, alienAnimation, deathCounters, playerSprite, bulletSprite, deathSprite, textSpriteSheet,
-                  numberSpriteSheet,
-                  reinterpret_cast<uint32_t &>(score));
+        if (gameLost)
+        {
+            drawTextBuffer(&buffer, textSpriteSheet, "GAME OVER!", 80, game.height / 2 + 50,
+                           rgbToUint32(128, 0, 0));
+            drawTextBuffer(&buffer, textSpriteSheet, "SCORE:", 80, game.height / 2 - 2 * numberSpriteSheet.height - 12 +50,
+                           rgbToUint32(128, 0, 0));
+            drawNumberBuffer(&buffer, numberSpriteSheet, score, 120,
+                             game.height / 2 - 2 * numberSpriteSheet.height - 12 + 50,
+                             rgbToUint32(128, 0, 0));
+        } else {
+            drawScene(buffer, game, alienAnimation, deathCounters, playerSprite, bulletSprite, deathSprite, textSpriteSheet,
+                      numberSpriteSheet,
+                      reinterpret_cast<uint32_t &>(score));
+        }
+
 
         glTexSubImage2D(
                 GL_TEXTURE_2D, 0, 0, 0,
@@ -80,12 +98,19 @@ int main() {
 
         glfwSwapBuffers(window);
 
-        // Simulate Aliens
-        simulateAliens(game, alienAnimation, deathCounters);
-        simulateBullets(game, bulletSprite, deathSprite, alienAnimation, reinterpret_cast<uint32_t &>(score));
-        simulatePlayer(game, playerSprite, playerMoveDirection);
-        processEvents(game, playerSprite);
+        if (!gameLost)
+        {
+            if (!skipSimulation) {
+                simulateAliens(game, alienAnimation, deathCounters, alienMoveDirection);
+            }
+            simulateBullets(game, bulletSprite, deathSprite, alienAnimation, reinterpret_cast<uint32_t &>(score));
+            simulatePlayer(game, playerSprite, playerMoveDirection);
+            processEvents(game, playerSprite);
 
+            gameLost = checkGameOver(game, playerSprite, alienAnimation);
+        }
+
+        skipSimulation = !skipSimulation;
         glfwPollEvents();
     }
 
