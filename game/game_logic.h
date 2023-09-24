@@ -7,7 +7,7 @@
 
 #include "game.h"
 
-void simulateAliens(Game &game, __attribute__((unused)) SpriteAnimation *alienAnimation, uint8_t *deathCounters);
+void simulateAliens(Game &game, __attribute__((unused)) SpriteAnimation *alienAnimation, uint8_t *deathCounters, int& alienMoveDirection);
 
 void simulateBullets(Game &game, Sprite &bulletSprite, Sprite &deathSprite, SpriteAnimation *alienAnimation,
                      uint32_t &score);

@@ -8,6 +8,34 @@ uint32_t rgbToUint32(uint8_t r, uint8_t g, uint8_t b) {
     return (r << 24) | (g << 16) | (b << 8) | 255;
 }
 
+int getAlienMaxX (Game& game)
+{
+    int maxX {0};
+
+    for (int i = 0; i < game.numberOfAliens; i++) {
+        Alien &alien = game.aliens[i];
+        if (alien.x > maxX && alien.type != ALIEN_DEAD) {
+            maxX = (int)alien.x;
+        }
+    }
+
+    return maxX;
+}
+
+int getAlienMinX (Game& game)
+{
+    int minX {(int)game.width};
+
+    for (int i = 0; i < game.numberOfAliens; i++) {
+        Alien &alien = game.aliens[i];
+        if (alien.x < minX && alien.type != ALIEN_DEAD) {
+            minX = (int)alien.x;
+        }
+    }
+
+    return minX;
+}
+
 Sprite *createAlienSprites() {
     static Sprite alienSprites[6];
 

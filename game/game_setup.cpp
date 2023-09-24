@@ -4,11 +4,11 @@
 
 #include "game.h"
 
-void prepareGame(Game &game, Sprite *&alienSprites, Sprite &deathSprite, SpriteAnimation *alienAnimation, uint8_t *&deathCounters, Buffer &buffer) {
+void prepareGame(Game &game, Sprite *&alienSprites, Sprite &deathSprite, SpriteAnimation *alienAnimation, uint8_t *&deathCounters, Buffer &buffer, int &alienUpdateFrequency) {
     for (size_t i = 0; i < 3; ++i) {
         alienAnimation[i].loop = true;
         alienAnimation[i].numberOfFrames = 2;
-        alienAnimation[i].frameDuration = 10;
+        alienAnimation[i].frameDuration = alienUpdateFrequency;
         alienAnimation[i].time = 0;
 
         alienAnimation[i].frames = new Sprite *[2];

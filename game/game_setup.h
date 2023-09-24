@@ -8,6 +8,5 @@
 #include "../sprite/sprite.h"
 #include <cstdint>
 
-void prepareGame(Game &game, Sprite *&alienSprites, Sprite &deathSprite, SpriteAnimation *alienAnimation, uint8_t *&deathCounters, Buffer &buffer);
-
+void prepareGame(Game &game, Sprite *&alienSprites, Sprite &deathSprite, SpriteAnimation *alienAnimation, uint8_t *&deathCounters, Buffer &buffer, int &alienUpdateFrequency);
 #endif //CPP_SPACE_INVADERS_GAME_SETUP_H

@@ -52,7 +52,6 @@ int main() {
     game.numberOfAliens = 55;
     auto *deathCounters = new uint8_t[game.numberOfAliens];
 
-    prepareGame(game, alienSprites, deathSprite, alienAnimation, deathCounters, buffer);
 
     uint32_t clearColor = rgbToUint32(0, 128, 0);
 
@@ -61,6 +60,12 @@ int main() {
     gameRunning = true;
 
     int playerMoveDirection;
+    int alienMoveDirection {1};
+    int alienUpdateFrequency {120};
+    bool skipSimulation {false};
+
+    prepareGame(game, alienSprites, deathSprite, alienAnimation, deathCounters, buffer, alienUpdateFrequency);
+
 
     // Game loop
     while (!glfwWindowShouldClose(window) && gameRunning) {
@@ -80,12 +85,15 @@ int main() {
 
         glfwSwapBuffers(window);
 
-        // Simulate Aliens
-        simulateAliens(game, alienAnimation, deathCounters);
+        if (!skipSimulation)
+        {
+        simulateAliens(game, alienAnimation, deathCounters, alienMoveDirection);
+        }
         simulateBullets(game, bulletSprite, deathSprite, alienAnimation, reinterpret_cast<uint32_t &>(score));
         simulatePlayer(game, playerSprite, playerMoveDirection);
         processEvents(game, playerSprite);
 
+        skipSimulation = !skipSimulation;
         glfwPollEvents();
     }
 
